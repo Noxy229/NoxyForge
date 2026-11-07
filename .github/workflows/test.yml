@@ -1,0 +1,22 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - run: lua5.4 tests/lua/run.lua .
+      - run: lua5.4 tests/lua/test_geometry.lua .
+      - run: lua5.4 tests/lua/test_superpowers.lua .
+      - run: lua5.4 tests/lua/test_material.lua .
+      - run: python -m unittest discover -s tests/python -v
+      - run: python tools/forge.py pack --help
